@@ -5,11 +5,13 @@ from .. import schemas
 from .. import models
 from passlib.context import CryptContext
 
-router = APIRouter()
+router = APIRouter(
+    tags=['users']
+)
 
 passwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-@router.post('/register/', response_model=schemas.ShowUser, tags=['users'])
+@router.post('/register/', response_model=schemas.ShowUser)
 def create_user(request: schemas.User, db = Depends(get_db)):
     hashPassword = passwd_context.hash(request.password)
     new_user = models.UserModel(name=request.name, email=request.email, password=hashPassword)
@@ -18,7 +20,7 @@ def create_user(request: schemas.User, db = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@router.get('/user/{id}/', response_model=schemas.ShowUser, tags=['users'])
+@router.get('/user/{id}/', response_model=schemas.ShowUser)
 def get_user(id: int, db = Depends(get_db)):
     user = db.query(models.UserModel).filter(models.UserModel.id == id).first()
 
@@ -26,7 +28,7 @@ def get_user(id: int, db = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'user with id {id} is not found')
     return user
 
-@router.get('/user/', response_model=List[schemas.ShowUser], tags=['users'], status_code=status.HTTP_200_OK)
+@router.get('/user/', response_model=List[schemas.ShowUser], status_code=status.HTTP_200_OK)
 def all_user(db = Depends(get_db)):
     users = db.query(models.UserModel).all()
     return users

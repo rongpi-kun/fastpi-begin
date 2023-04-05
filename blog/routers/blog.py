@@ -4,9 +4,12 @@ from .. database import get_db
 from .. import schemas
 from .. import models
 
-router = APIRouter()
+router = APIRouter(
+    prefix='/blog',
+    tags=['blogs']
+)
 
-@router.post('/blog/', status_code=201, tags=['blogs'])
+@router.post('/', status_code=201)
 def create_blog(request: schemas.Blog, db = Depends(get_db)):
     new_blog = models.BlogModel(title=request.title, author=request.author, user_id = 1)
     db.add(new_blog)
@@ -14,12 +17,12 @@ def create_blog(request: schemas.Blog, db = Depends(get_db)):
     db.refresh(new_blog)
     return new_blog
 
-@router.get('/blog/', status_code=status.HTTP_200_OK, tags=['blogs'], response_model=List[schemas.ShowBlog])
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[schemas.ShowBlog])
 def all(db = Depends(get_db)):
     all_blogs = db.query(models.BlogModel).all()
     return all_blogs
 
-@router.get('/blog/{id}/', status_code=200, tags=['blogs'], response_model=schemas.ShowBlog)
+@router.get('/{id}/', status_code=200, response_model=schemas.ShowBlog)
 def get_blog(id, db = Depends(get_db)):
     blog = db.query(models.BlogModel).filter(models.BlogModel.id == id).first()
 
@@ -27,7 +30,7 @@ def get_blog(id, db = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'data with {id} is not found')
     return blog
 
-@router.put('/blog/update/{id}/', status_code=status.HTTP_202_ACCEPTED, tags=['blogs'])
+@router.put('/update/{id}/', status_code=status.HTTP_202_ACCEPTED)
 def update(request: schemas.Blog, id, db = Depends(get_db)):
     blog = db.query(models.BlogModel).filter(models.BlogModel.id == id)
     if not blog.first():
@@ -36,7 +39,7 @@ def update(request: schemas.Blog, id, db = Depends(get_db)):
     db.commit()
     return 'successfully updated'
 
-@router.delete('/blog/{id}/', tags=['blogs'])
+@router.delete('/{id}/')
 def delete(id, db = Depends(get_db)):
     blog = db.query(models.BlogModel).filter(models.BlogModel.id == id)
     if not blog.first():
