@@ -3,15 +3,22 @@ from typing import List
 from .. database import get_db
 from .. import schemas
 from .. import models
+from .. token import get_current_user
+from typing import Annotated
+
 
 router = APIRouter(
     prefix='/blog',
     tags=['blogs']
 )
 
+
+
 @router.post('/', status_code=201)
-def create_blog(request: schemas.Blog, db = Depends(get_db)):
-    new_blog = models.BlogModel(title=request.title, author=request.author, user_id = 1)
+def create_blog(request: schemas.Blog, db = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    print('user:', current_user.email)
+    user = db.query(models.UserModel).filter(models.UserModel.email == current_user.email).first()
+    new_blog = models.BlogModel(title=request.title, author=request.author, user_id = user.id)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)

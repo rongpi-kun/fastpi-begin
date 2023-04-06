@@ -4,6 +4,7 @@ from .. database import get_db
 from .. import schemas
 from .. import models
 from passlib.context import CryptContext
+from .. import token
 
 router = APIRouter(
     tags=['users']
@@ -21,7 +22,7 @@ def create_user(request: schemas.User, db = Depends(get_db)):
     return new_user
 
 @router.get('/user/{id}/', response_model=schemas.ShowUser)
-def get_user(id: int, db = Depends(get_db)):
+def get_user(id: int, db = Depends(get_db), current_user: schemas.User = Depends(token.get_current_user)):
     user = db.query(models.UserModel).filter(models.UserModel.id == id).first()
 
     if not user:
@@ -29,6 +30,6 @@ def get_user(id: int, db = Depends(get_db)):
     return user
 
 @router.get('/user/', response_model=List[schemas.ShowUser], status_code=status.HTTP_200_OK)
-def all_user(db = Depends(get_db)):
+def all_user(db = Depends(get_db), current_user: schemas.User = Depends(token.get_current_user)):
     users = db.query(models.UserModel).all()
     return users
