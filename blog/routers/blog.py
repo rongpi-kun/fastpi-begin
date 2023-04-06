@@ -6,13 +6,10 @@ from .. import models
 from .. token import get_current_user
 from typing import Annotated
 
-
 router = APIRouter(
     prefix='/blog',
     tags=['blogs']
 )
-
-
 
 @router.post('/', status_code=201)
 def create_blog(request: schemas.Blog, db = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):

@@ -12,7 +12,10 @@ router = APIRouter(
 )
 
 @router.post('/')
-def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(request: schemas.UserLogin, db: Session = Depends(get_db)):
+    print(request)
+
+# def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.UserModel).filter(models.UserModel.email == request.username).first()
 
     if not user:
