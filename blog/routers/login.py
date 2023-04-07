@@ -5,6 +5,7 @@ from .. database import get_db
 from . user import passwd_context
 from .. token import *
 from fastapi.security import OAuth2PasswordRequestForm
+from typing import Annotated
 
 router = APIRouter(
     prefix='/login',
@@ -12,10 +13,10 @@ router = APIRouter(
 )
 
 @router.post('/')
-def login(request: schemas.UserLogin, db: Session = Depends(get_db)):
-    print(request)
+# def login(request: schemas.UserLogin, db: Session = Depends(get_db)):
+#     print(request)
 
-# def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(request: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
     user = db.query(models.UserModel).filter(models.UserModel.email == request.username).first()
 
     if not user:
